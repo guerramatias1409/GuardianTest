@@ -18,7 +18,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Register"),),
+      appBar: AppBar(
+        title: Text("Register"),
+      ),
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -110,14 +112,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     borderRadius: new BorderRadius.circular(10.0),
                     color: Colors.blueAccent,
                     child: InkWell(
-                      onTap: () async{
+                      onTap: () async {
                         registerEmail();
                       },
                       child: Container(
                         height: 50,
                         alignment: Alignment.center,
-                        child: Text(
-                            'REGISTER',
+                        child: Text('REGISTER',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
@@ -134,29 +135,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void registerEmail() async{
-    if(validateAndSave()){
-      try{
-        userId = await _firebaseAuth.registerWithEmailAndPassword(email, password);
-        if(userId!=null){
+  void registerEmail() async {
+    if (validateAndSave()) {
+      try {
+        userId =
+            await _firebaseAuth.registerWithEmailAndPassword(email, password);
+        if (userId != null) {
           createNewUser(userId);
         }
-      } on PlatformException catch (e){
+      } on PlatformException catch (e) {
         print("Error $e}");
       }
-
     }
   }
 
-  bool validateAndSave(){
+  bool validateAndSave() {
     final form = formKey.currentState;
     form.save();
     return true;
   }
 
-  void createNewUser(String id) async{
+  void createNewUser(String id) async {
     print("create new user");
-    var user = new User.createNew(id,name,email);
+    var user = new User.createNew(id, name, email);
 
     var userRef = FirebaseFirestore.instance.collection("Users").doc(id);
 

@@ -26,16 +26,14 @@ class _FirstPageState extends State<FirstPage> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) =>
-                              RegisterScreen()));
+                          builder: (context) => RegisterScreen()));
                 },
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
                   width: 160,
                   height: 50,
                   alignment: Alignment.center,
-                  child: Text(
-                      'REGISTER',
+                  child: Text('REGISTER',
                       style: TextStyle(
                           color: Colors.white,
                           fontSize: 17,
@@ -50,27 +48,20 @@ class _FirstPageState extends State<FirstPage> {
               color: Colors.transparent,
               child: InkWell(
                 onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) =>
-                              LoginScreen()));
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => LoginScreen()));
                 },
                 borderRadius: BorderRadius.circular(10),
                 child: Container(
-                  width: 160 ,
-                  height: 50 ,
+                  width: 160,
+                  height: 50,
                   decoration: new BoxDecoration(
-                      borderRadius:
-                      new BorderRadius.circular( 10.0 ) ,
-                      border:
-                      new Border.all( color: Colors.grey ) ) ,
-                  alignment: Alignment.center ,
-                  child: Text (
-                      'LOGIN' ,
-                      style: TextStyle (
-                          fontSize: 17 ,
-                          fontWeight: FontWeight.bold ) ) ,
+                      borderRadius: new BorderRadius.circular(10.0),
+                      border: new Border.all(color: Colors.grey)),
+                  alignment: Alignment.center,
+                  child: Text('LOGIN',
+                      style:
+                          TextStyle(fontSize: 17, fontWeight: FontWeight.bold)),
                 ),
               ),
             ),

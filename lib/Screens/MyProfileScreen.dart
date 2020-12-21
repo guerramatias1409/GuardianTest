@@ -11,7 +11,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("My Profile"),centerTitle: true),
+      appBar: AppBar(title: Text("My Profile"), centerTitle: true),
       body: Column(
         children: [
           Padding(
@@ -20,10 +20,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
               children: [
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text("Name: "),
-                    Text("Matias Guerra")
-                  ],
+                  children: [Text("Name: "), Text("Matias Guerra")],
                 ),
                 SizedBox(height: 10),
                 Row(
@@ -45,7 +42,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 height: 46,
                 width: double.infinity,
                 decoration:
-                BoxDecoration(borderRadius: BorderRadius.circular(15)),
+                    BoxDecoration(borderRadius: BorderRadius.circular(15)),
                 child: FloatingActionButton.extended(
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10))),
@@ -59,8 +56,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                   label: Text(
                     'Logout',
                     maxLines: 1,
-                    style: TextStyle(
-                        fontSize: 17, fontWeight: FontWeight.bold),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                   ),
                   onPressed: () {
                     logOut();
@@ -75,10 +71,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   }
 
   void logOut() {
-    try{
-     final FirebaseAuthService auth = locator<FirebaseAuthService>();
-     auth.signOut(context);
-    }catch(e){
+    try {
+      final FirebaseAuthService auth = locator<FirebaseAuthService>();
+      auth.signOut(context);
+    } catch (e) {
       print("signOut error: $e");
     }
   }

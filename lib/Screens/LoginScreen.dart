@@ -91,8 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Container(
                         height: 50,
                         alignment: Alignment.center,
-                        child: Text(
-                            'Login',
+                        child: Text('Login',
                             style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 17,
@@ -110,19 +109,20 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void logIn() async {
-    if(validateAndSave()){
-      try{
-        String result = await _firebaseAuth.signInWithEmailAndPassword(email, password, context);
+    if (validateAndSave()) {
+      try {
+        String result = await _firebaseAuth.signInWithEmailAndPassword(
+            email, password, context);
         if (result != "") {
           print("RESULT ERRROR $result");
         }
-      }on PlatformException catch (e){
+      } on PlatformException catch (e) {
         print("ERROR $e");
       }
     }
   }
 
-  bool validateAndSave(){
+  bool validateAndSave() {
     final form = formKey.currentState;
     form.save();
     return true;
