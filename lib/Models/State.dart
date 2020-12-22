@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class State {
-  double state1;
-  double state2;
-  double state3;
+  int state1;
+  int state2;
+  int state3;
 
   State();
 
@@ -21,9 +21,9 @@ class State {
 
   Map<String, dynamic> toJson(){
     return {
-      "State1": state1.toStringAsFixed(0),
-      "State2": state2.toStringAsFixed(0),
-      "State3": state3.toStringAsFixed(0),
+      "State1": state1,
+      "State2": state2,
+      "State3": state3,
     };
   }
 }
