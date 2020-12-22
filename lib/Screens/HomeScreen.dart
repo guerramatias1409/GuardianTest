@@ -17,10 +17,14 @@ class _HomeScreenState extends State<HomeScreen> {
   final formKey = GlobalKey<FormState>();
   UserState.State userState = new UserState.State();
 
+  List<DropdownMenuItem<User>> usersList;
+  User selectedUser;
+  
   @override
   void initState() {
     user = locator<FirebaseAuthService>().currentUser();
-    print("USER ${user}");
+    print("USER $user");
+    getUsersList();
     if (user == null) {
       userState.state1 = 50;
       userState.state2 = 50;
@@ -74,6 +78,11 @@ class _HomeScreenState extends State<HomeScreen> {
                           height: 50,
                           alignment: Alignment.centerLeft,
                           child: TextFormField(
+                            onChanged: (value){
+                              setState(() {
+                                userId = value;
+                              });
+                            },
                             style: TextStyle(
                               color: Colors.white,
                               fontSize: 17,
@@ -96,6 +105,17 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Text("Guardian: "),
                         SizedBox(height: 5),
+                        usersList == null
+                            ? Container()
+                            : Center(
+                              child: DropdownButton<User>(
+                              hint: Text("Users"),
+                              value: selectedUser == null
+                                  ? null
+                                  : selectedUser,
+                              onChanged: onChangeDropdownItem,
+                              items: usersList),
+                            )
                       ],
                     ),
                     Container(
@@ -107,6 +127,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(15)),
                         child: FloatingActionButton.extended(
+                          heroTag: 'SaveGuardian',
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.all(Radius.circular(10))),
                           backgroundColor: Colors.green,
@@ -123,7 +144,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
                           ),
                           onPressed: () {
-
+                            saveGuardian();
                           },
                         ),
                       ),
@@ -272,6 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(15)),
                     child: FloatingActionButton.extended(
+                      heroTag: "SendState",
                       shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10))),
                       backgroundColor: Colors.green,
@@ -321,5 +343,58 @@ class _HomeScreenState extends State<HomeScreen> {
     final form = formKey.currentState;
     form.save();
     return true;
+  }
+
+  void getUsersList() {
+    FirebaseFirestore.instance.collection("Users").get().then((snapshot) {
+      var users = new List<User>();
+      snapshot.docs.forEach((DocumentSnapshot document) {
+        users.add(new User.fromDocument(document));
+      });
+
+      usersList = users.map((User value) {
+        return new DropdownMenuItem<User>(
+            value: value,
+            child: Container(
+              padding: EdgeInsets.symmetric(vertical: 5),
+              constraints: BoxConstraints(maxWidth: 200),
+              child: new Row(
+                children: [
+                  CircleAvatar(
+                    backgroundColor:
+                    Colors.grey,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 5),
+                  Flexible(
+                    child: Text(value.name,
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                ],
+              ),
+            ));
+      }).toList();
+      setState(() {
+        print("seteo");
+      });
+    });
+  }
+
+  void onChangeDropdownItem(User _selectedUser) {
+    setState(() {
+      selectedUser = _selectedUser;
+    });
+  }
+
+  void saveGuardian() async{
+    var userRef = FirebaseFirestore.instance
+        .collection("Users")
+        .doc(userId);
+
+    await userRef.update({"GuardianId": selectedUser.id});
   }
 }
