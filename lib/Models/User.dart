@@ -7,6 +7,7 @@ class User {
   String name;
   String email;
   State state;
+  User guardian;
 
   User();
 
@@ -16,7 +17,8 @@ class User {
     this.id = document.id;
     this.name = document.data()["Name"] == null ? "" : document.data()["Name"];
     this.email = document.data()["Email"] == null ? "" : document.data()["Email"];
-    this.state = document.data()["State"] == null ? null : new State.fromJson(document.data()["State"]) ;
+    this.state = document.data()["State"] == null ? null : new State.fromJson(document.data()["State"]);
+    this.guardian = document.data()["Guardian"] == null ? null : new User.fromJson(document.data()["Guardian"]);
   }
 
   User.fromJson(Map<dynamic, dynamic> json){
@@ -24,6 +26,7 @@ class User {
     this.name = json["Name"] ?? "";
     this.email = json["Email"] ?? "";
     this.state = json["State"] == null ? null : new State.fromJson(json["State"]);
+    this.guardian = json["Guardian"] == null ? null : new User.fromJson(json["Guardian"]);
   }
 
   Map<String, dynamic> toJson(){
@@ -31,7 +34,8 @@ class User {
       "Id": id,
       "Name": name,
       "Email": email,
-      "State": state
+      "State": state,
+      "Guardian": guardian
     };
   }
 }
