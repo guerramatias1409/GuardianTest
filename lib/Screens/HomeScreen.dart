@@ -1,10 +1,15 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:guardiantest/Models/Token.dart';
 import 'package:guardiantest/Models/User.dart';
 import 'package:guardiantest/Models/State.dart' as UserState;
 import 'package:guardiantest/Screens/MyProfileScreen.dart';
 import 'package:guardiantest/Services/FirebaseAuthService.dart';
 import 'package:guardiantest/locator.dart';
+import 'package:http/http.dart' as http;
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -19,12 +24,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   List<DropdownMenuItem<User>> usersList;
   User selectedUser;
+
+  List<Token> tokensList;
+
+  final String serverToken = 'AAAARJPxwqY:APA91bFSoETo7nWT_n0rhuprXlQ0DARZvfZIYMmZCQ6rGKF518cY75ZoTYumg6S76p6tp9qqlwf3IEi_eqkSVK_sK3vVZYPHd_RHHDQyjIcsC7Qtrh7z6xs2QAcpg_hKlr-tw-VzJwCt';
+  final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
   
   @override
-  void initState() {
+  void initState(){
     user = locator<FirebaseAuthService>().currentUser();
     print("USER $user");
     getUsersList();
+    getTokensList();
     if (user == null) {
       userState.state1 = 50;
       userState.state2 = 50;
@@ -170,7 +181,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   userState.state1 = value.toInt();
-                                  print("State 1 = ${userState.state1}");
                                 });
                               },
                             ),
@@ -217,7 +227,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   userState.state2 = value.toInt();
-                                  print("State 2 = ${userState.state2}");
                                 });
                               },
                             ),
@@ -263,7 +272,6 @@ class _HomeScreenState extends State<HomeScreen> {
                               onChanged: (value) {
                                 setState(() {
                                   userState.state3 = value.toInt();
-                                  print("State 3 = ${userState.state3}");
                                 });
                               },
                             ),
@@ -335,6 +343,11 @@ class _HomeScreenState extends State<HomeScreen> {
           .doc(userId);
 
       await userRef.update({"State": userState.toJson()});
+      
+      tokensList.forEach((token) {
+        sendMessage(token);
+      });
+      
     }
 
   }
@@ -396,5 +409,61 @@ class _HomeScreenState extends State<HomeScreen> {
         .doc(userId);
 
     await userRef.update({"GuardianId": selectedUser.id});
+  }
+
+  Future<void> getTokensList() async{
+    FirebaseFirestore.instance
+        .collection("Users")
+        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02")
+        .collection("Tokens")
+        .get().then((snapshot) {
+          var tokens = List<Token>();
+      snapshot.docs.forEach((DocumentSnapshot document) {
+        tokens.add(new Token.fromDocument(document));
+      });
+
+      tokens.sort((a,b){
+        if(a.platform != b.platform){
+          return a.platform == "ios" ? -1 : 1;
+        }else{
+          return a.device.compareTo(b.device);
+        }
+      });
+
+      setState(() {
+        tokensList = tokens;
+      });
+      print("TOKENSLIST LENGHT: ${tokensList.length}");
+    });
+  }
+
+  void sendMessage(Token token) async{
+    print("SEND MESSAGE");
+    await firebaseMessaging.requestNotificationPermissions(
+      const IosNotificationSettings(sound: true, badge: true, alert: true, provisional: false),
+    );
+
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverToken',
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'Go and help him',
+            'title': 'Your protected has changed state',
+            'sound': 'default'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+          },
+          'to': token.token,
+        },
+      ),
+    );
+    print("PASO POST");
   }
 }
