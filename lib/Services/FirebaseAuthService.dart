@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:guardiantest/Models/User.dart' as guardianTest;
 import 'package:guardiantest/Screens/FirstPage.dart';
 import 'package:guardiantest/Screens/HomeScreen.dart';
+import 'package:guardiantest/Services/NotificationService.dart';
+import 'package:guardiantest/locator.dart';
 
 class FirebaseAuthService with ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -82,6 +84,7 @@ class FirebaseAuthService with ChangeNotifier {
       _currentUser = new guardianTest.User.fromDocument(firestoreUser);
       Navigator.pushReplacement(
           context, MaterialPageRoute(builder: (context) => HomeScreen()));
+      await locator<NotificationService>().init();
       print("CURRENT USER MAIL ${_currentUser.email}");
       var user = currentUser();
       print("USER: ${user.email}");

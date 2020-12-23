@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:guardiantest/Services/FirebaseAuthService.dart';
+import 'package:guardiantest/Services/NotificationService.dart';
 import 'package:guardiantest/locator.dart';
 
 class MyProfileScreen extends StatefulWidget {
@@ -70,9 +71,12 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     );
   }
 
-  void logOut() {
+  void logOut() async{
     try {
       final FirebaseAuthService auth = locator<FirebaseAuthService>();
+      final NotificationService _notificationService = locator<NotificationService>();
+      await _notificationService.logOut(auth.currentUser().id);
+      //TODO no toma el current user
       auth.signOut(context);
     } catch (e) {
       print("signOut error: $e");
