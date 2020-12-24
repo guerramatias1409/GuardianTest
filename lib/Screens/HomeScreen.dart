@@ -26,6 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   User selectedUser;
 
   List<Token> tokensList;
+  List<User> guardiansList = List<User>();
 
   final String serverToken = 'AAAARJPxwqY:APA91bFSoETo7nWT_n0rhuprXlQ0DARZvfZIYMmZCQ6rGKF518cY75ZoTYumg6S76p6tp9qqlwf3IEi_eqkSVK_sK3vVZYPHd_RHHDQyjIcsC7Qtrh7z6xs2QAcpg_hKlr-tw-VzJwCt';
   final FirebaseMessaging firebaseMessaging = FirebaseMessaging();
@@ -35,6 +36,7 @@ class _HomeScreenState extends State<HomeScreen> {
     user = locator<FirebaseAuthService>().currentUser();
     print("USER $user");
     getUsersList();
+    getGuardiansList();
     getTokensList();
     if (user == null) {
       userState.state1 = 50;
@@ -159,6 +161,39 @@ class _HomeScreenState extends State<HomeScreen> {
                           },
                         ),
                       ),
+                    ),
+                    SizedBox(height: 10),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("My Guardians: "),
+                        SizedBox(height: 5),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: guardiansList.length==0? [
+                            Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text("You have no guardians"),
+                          )
+                          ] :
+                          guardiansList.map((guardian) {
+                            return Row(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(guardian.name),
+                                ),
+                                GestureDetector(
+                                    onTap: () {
+                                      deleteGuardian(guardian);
+                                    },
+                                    child: Icon(Icons.delete))
+                              ],
+                            );
+                          }).toList(),
+                        )
+                      ],
                     ),
                     SizedBox(height: 10),
                     Text("State 1:"),
@@ -347,7 +382,8 @@ class _HomeScreenState extends State<HomeScreen> {
       tokensList.forEach((token) {
         sendMessage(token);
       });
-      
+
+      clearStates();
     }
 
   }
@@ -404,22 +440,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void saveGuardian() async{
-    var userRef = FirebaseFirestore.instance
+    print("SAVE GUARDIAN");
+    var guardianRef = FirebaseFirestore.instance
         .collection("Users")
-        .doc(userId);
+        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02") //TODO usar current user
+        .collection("Guardians")
+        .doc(selectedUser.id);
 
-    await userRef.update({"GuardianId": selectedUser.id});
+    await guardianRef.set(selectedUser.toJson());
+    getGuardiansList();
+    setState(() {
+      guardiansList = guardiansList;
+    });
   }
 
   Future<void> getTokensList() async{
     FirebaseFirestore.instance
         .collection("Users")
-        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02")
-        .collection("Tokens")
-        .get().then((snapshot) {
+        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02") //TODO usar current user
+        .collection("Guardians")
+        .get()
+        .then((snapshot) {
           var tokens = List<Token>();
       snapshot.docs.forEach((DocumentSnapshot document) {
-        tokens.add(new Token.fromDocument(document));
+        var user = new User.fromDocument(document);
+        FirebaseFirestore.instance
+            .collection("Users")
+            .doc(user.id)
+            .collection("Tokens")
+            .get()
+            .then((tokenSnapshot){
+              tokenSnapshot.docs.forEach((token) {
+                tokens.add(new Token.fromDocument(token));
+              });
+        });
       });
 
       tokens.sort((a,b){
@@ -465,5 +519,47 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
     print("PASO POST");
+  }
+
+  void clearStates() {
+    setState(() {
+      userState.state1 = 50;
+      userState.state2 = 50;
+      userState.state3 = 50;
+    });
+  }
+
+  void getGuardiansList() {
+    guardiansList.clear();
+    print("GET GUARDIAN LIST");
+    FirebaseFirestore.instance
+        .collection("Users")
+        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02") //TODO usar current user
+        .collection("Guardians")
+        .get()
+        .then((snapshot) {
+          print("LENGHT: ${snapshot.docs.length}");
+          snapshot.docs.forEach((document) {
+            print("USER: ${User.fromDocument(document).toJson()}");
+            guardiansList.add(new User.fromDocument(document));
+            setState(() {
+              guardiansList = guardiansList;
+            });
+          });
+    });
+  }
+
+  void deleteGuardian(User guardian) async{
+    var guardianRef = FirebaseFirestore.instance
+        .collection("Users")
+        .doc("VrqFTDrCAIaTMHR9vwo8wWfazx02") //TODO usar current user
+        .collection("Guardians")
+        .doc(guardian.id);
+
+    await guardianRef.delete();
+    getGuardiansList();
+    setState(() {
+      guardiansList = guardiansList;
+    });
   }
 }
